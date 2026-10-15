@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bank connection</title>
+<style>
+  :root{--bg:#fff;--fg:#222;--box:#f2f2f2}
+  @media (prefers-color-scheme:dark){:root{--bg:#161616;--fg:#ddd;--box:#262626}}
+  body{background:var(--bg);color:var(--fg);font-family:system-ui,sans-serif;max-width:640px;margin:2rem auto;padding:0 1rem;line-height:1.6}
+  textarea{width:100%;box-sizing:border-box;background:var(--box);color:var(--fg);border:1px solid #888;border-radius:6px;padding:.6rem;font-family:monospace}
+  button{margin-top:.5rem;padding:.5rem 1rem;cursor:pointer}
+</style>
+</head>
+<body>
+<h1>Bank connection</h1>
+<div id="out"><p>Waiting for a response from your bank…</p></div>
+
+<script>
+// Reads the code from the URL and shows it. Nothing is sent anywhere.
+(function () {
+  var p = new URLSearchParams(window.location.search);
+  var code = p.get("code");
+  var error = p.get("error");
+  var desc = p.get("error_description");
+  var out = document.getElementById("out");
+  out.textContent = "";
+
+  function add(tag, text) {
+    var el = document.createElement(tag);
+    el.textContent = text;
+    out.appendChild(el);
+    return el;
+  }
+
+  if (error) {
+    add("p", "The connection failed: " + error + (desc ? " (" + desc + ")" : ""));
+  } else if (code) {
+    add("p", "Success. Copy this code into your app:");
+    var ta = document.createElement("textarea");
+    ta.rows = 3;
+    ta.readOnly = true;
+    ta.value = code;
+    out.appendChild(ta);
+    var btn = add("button", "Copy code");
+    btn.onclick = function () {
+      ta.select();
+      navigator.clipboard.writeText(code).then(function () { btn.textContent = "Copied"; });
+    };
+    add("p", "You can close this tab afterwards.");
+  } else {
+    add("p", "No code found in the URL. Start the connection from your app.");
+  }
+})();
+</script>
+</body>
+</html>
